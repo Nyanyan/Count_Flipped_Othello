@@ -3,7 +3,7 @@
 #include "board.hpp"
 
 #define FULL_SEARCH_DEPTH 12
-#define RANDOM_PLAY_N 100000 //10000000
+#define RANDOM_PLAY_N 10000000
 
 void full_search(Board *board, int n_discs, uint64_t n_flipped_sum[], uint64_t n_flipped_count[]) {
     if (n_discs >= FULL_SEARCH_DEPTH + 4) {
@@ -90,26 +90,18 @@ int main() {
             n_flipped_average[i] = (double)n_flipped_sum[i] / n_flipped_count[i];
         }
     }
-    double avg = 0.0;
+    double whole_avg = 0.0;
     for (int i = 4; i < 64; ++i) {
-        avg += n_flipped_average[i];
+        whole_avg += n_flipped_average[i];
     }
-    avg /= 60;
+    whole_avg /= 60;
 
-    for (int i = 0; i < 64; ++i) {
-        std::cout << n_flipped_count[i] << " ";
-        if (i % 8 == 7) {
-            std::cout << "\n";
-        }
-    }
 
-    std::cerr << "played " << RANDOM_PLAY_N << " games randomly" << std::endl;
-    for (int i = 0; i < 64; ++i) {
-        std::cout << n_flipped_average[i] << " ";
-        if (i % 8 == 7) {
-            std::cout << "\n";
-        }
+    std::cout << "full_search_depth " << FULL_SEARCH_DEPTH << std::endl;
+    std::cout << "random_play " << RANDOM_PLAY_N << std::endl;
+    for (int i = 4; i < 64; ++i) {
+        std::cout << "ply " << i - 3 << " avg " << n_flipped_average[i] << " count " << n_flipped_count[i] << std::endl;
     }
-    std::cout << "avg " << avg << std::endl;
+    std::cout << "whole_avg " << whole_avg << std::endl;
     return 0;
 }
