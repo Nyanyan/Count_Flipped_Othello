@@ -5,7 +5,7 @@
 #define FULL_SEARCH_DEPTH 12
 #define RANDOM_PLAY_N 10000000
 
-void full_search(Board *board, int n_discs, uint64_t n_flipped_sum[], uint64_t n_flipped_count[]) {
+void full_search(Board *board, int n_discs, uint64_t n_flipped_sum[], uint64_t n_flipped_suquared_sum[], uint64_t n_flipped_count[]) {
     if (n_discs >= FULL_SEARCH_DEPTH + 4) {
         return;
     }
@@ -13,7 +13,7 @@ void full_search(Board *board, int n_discs, uint64_t n_flipped_sum[], uint64_t n
     if (legal == 0) {
         board->pass();
             if (board->get_legal()) {
-                full_search(board, n_discs, n_flipped_sum, n_flipped_count);
+                full_search(board, n_discs, n_flipped_sum, n_flipped_suquared_sum, n_flipped_count);
             }
         board->pass();
         return;
@@ -21,10 +21,12 @@ void full_search(Board *board, int n_discs, uint64_t n_flipped_sum[], uint64_t n
     Flip flip;
     for (uint_fast8_t cell = first_bit(&legal); legal; cell = next_bit(&legal)) {
         calc_flip(&flip, board, cell);
-        n_flipped_sum[n_discs] += pop_count_ull(flip.flip);
+        int n_flip = pop_count_ull(flip.flip);
+        n_flipped_sum[n_discs] += n_flip;
+        n_flipped_suquared_sum[n_discs] += n_flip * n_flip;
         ++n_flipped_count[n_discs];
         board->move_board(&flip);
-            full_search(board, n_discs + 1, n_flipped_sum, n_flipped_count);
+            full_search(board, n_discs + 1, n_flipped_sum, n_flipped_suquared_sum, n_flipped_count);
         board->undo_board(&flip);
     }
 }
@@ -34,9 +36,11 @@ int main() {
     mobility_init();
     flip_init();
     uint64_t n_flipped_sum[64];
+    uint64_t n_flipped_suquared_sum[64];
     uint64_t n_flipped_count[64];
     for (int i = 0; i < 64; ++i) {
         n_flipped_sum[i] = 0;
+        n_flipped_suquared_sum[i] = 0;
         n_flipped_count[i] = 0;
     }
     Board board;
@@ -45,7 +49,7 @@ int main() {
     // full search
     std::cerr << "full search until depth " << FULL_SEARCH_DEPTH << std::endl;
     board.reset();
-    full_search(&board, 4, n_flipped_sum, n_flipped_count);
+    full_search(&board, 4, n_flipped_sum, n_flipped_suquared_sum, n_flipped_count);
     
     // random play
     std::cerr << "random play N = " << RANDOM_PLAY_N << std::endl;
@@ -75,7 +79,9 @@ int main() {
             int policy = first_bit(&legal);
             calc_flip(&flip, &board, policy);
             if (n_discs >= FULL_SEARCH_DEPTH + 4) {
-                n_flipped_sum[n_discs] += pop_count_ull(flip.flip);
+                int n_flip = pop_count_ull(flip.flip);
+                n_flipped_sum[n_discs] += n_flip;
+                n_flipped_suquared_sum[n_discs] += n_flip * n_flip;
                 ++n_flipped_count[n_discs];
             }
             board.move_board(&flip);
@@ -83,11 +89,14 @@ int main() {
         }
     }
     double n_flipped_average[64];
+    double n_flipped_sd[64];
     for (int i = 0; i < 64; ++i) {
         if (n_flipped_count[i] == 0) {
-            n_flipped_average[i] = 0;
+            n_flipped_average[i] = 0.0;
+            n_flipped_sd[i] = 0.0;
         } else {
             n_flipped_average[i] = (double)n_flipped_sum[i] / n_flipped_count[i];
+            n_flipped_sd[i] = sqrt((double)n_flipped_suquared_sum[i] / n_flipped_count[i] - n_flipped_average[i] * n_flipped_average[i]);
         }
     }
     double whole_avg = 0.0;
@@ -98,10 +107,10 @@ int main() {
 
 
     std::cout << "full_search_depth " << FULL_SEARCH_DEPTH << std::endl;
-    std::cout << "random_play " << RANDOM_PLAY_N << std::endl;
-    for (int i = 4; i < 64; ++i) {
-        std::cout << "ply " << i - 3 << " avg " << n_flipped_average[i] << " count " << n_flipped_count[i] << std::endl;
-    }
+    std::cout << "n_random_play " << RANDOM_PLAY_N << std::endl;
     std::cout << "whole_avg " << whole_avg << std::endl;
+    for (int i = 4; i < 64; ++i) {
+        std::cout << "ply " << i - 3 << " avg " << n_flipped_average[i] << " sd " << n_flipped_sd[i] << " count " << n_flipped_count[i] << std::endl;
+    }
     return 0;
 }
