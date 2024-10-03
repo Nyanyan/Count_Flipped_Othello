@@ -4,7 +4,7 @@
 
 codes are copied from [Egaroucid](https://www.egaroucid.nyanyan.dev/)
 
-![n_flipped](image/n_flipped.png)
+![n_flipped](img/n_flipped.png)
 
 ```
 full_search_depth 12
