@@ -19,3 +19,6 @@ played 10000000 games randomly
 avg 2.24685
 ```
 
+
+
+![n_flipped](img/n_flipped.png)
