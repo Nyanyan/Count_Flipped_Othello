@@ -2,7 +2,7 @@
 #include <random>
 #include "board.hpp"
 
-#define FULL_SEARCH_DEPTH 12
+#define FULL_SEARCH_DEPTH 14
 #define RANDOM_PLAY_N 10000000
 
 void full_search(Board *board, int n_discs, uint64_t n_flipped_sum[], uint64_t n_flipped_suquared_sum[], uint64_t n_flipped_count[]) {
