@@ -1,3 +1,4 @@
+import math
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = "MS Gothic"
 
@@ -76,11 +77,17 @@ whole_avg = float(s[2].split()[1])
 x = [int(elem.split()[1]) for elem in s[3:]]
 avg = [float(elem.split()[3]) for elem in s[3:]]
 sd = [float(elem.split()[5]) for elem in s[3:]]
+count = [int(elem.split()[7]) for elem in s[3:]]
 avg_plus_sd = [avg[i] + sd[i] for i in range(len(avg))]
 avg_minus_sd = [avg[i] - sd[i] for i in range(len(avg))]
+avg_plus_95_confidence = [avg[i] + sd[i] / math.sqrt(count[i]) * 1.96 for i in range(len(avg))]
+avg_minus_95_confidence = [avg[i] - sd[i] / math.sqrt(count[i]) * 1.96 for i in range(len(avg))]
+
+#print([sd[i] / math.sqrt(count[i]) * 1.96 for i in range(len(avg))])
 
 plt.vlines(full_search_depth, 0, 7, color='g', linestyles='dotted')
 plt.fill_between(x, avg_plus_sd, avg_minus_sd, fc="yellow")
+#plt.fill_between(x, avg_plus_95_confidence, avg_minus_95_confidence, fc="yellow")
 plt.plot(x, avg)
 plt.xlabel('手')
 plt.ylabel('返る石の平均値(+-標準偏差)')
